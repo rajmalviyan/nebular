@@ -13,6 +13,9 @@ import {
   OnInit,
   OnDestroy,
   PLATFORM_ID,
+  Renderer2,
+  AfterViewChecked,
+  DoCheck,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -37,7 +40,7 @@ import { NbColumnsService } from './tree-grid-columns.service';
   },
   providers: [{ provide: NbCdkCell, useExisting: NbTreeGridCellDirective }],
 })
-export class NbTreeGridCellDirective extends NbCellDirective implements OnInit, OnDestroy {
+export class NbTreeGridCellDirective extends NbCellDirective implements DoCheck, OnInit, AfterViewChecked, OnDestroy {
   private destroy$ = new Subject<void>();
   private readonly tree: NbTreeGridComponent<any>;
   private readonly columnDef: NbTreeGridColumnDefDirective;
@@ -52,22 +55,6 @@ export class NbTreeGridCellDirective extends NbCellDirective implements OnInit, 
     return this.latestWidth || null;
   }
 
-  @HostBinding('style.padding-left')
-  get leftPadding(): string | SafeStyle | null {
-    if (this.directionService.isLtr()) {
-      return this.getStartPadding();
-    }
-    return null;
-  }
-
-  @HostBinding('style.padding-right')
-  get rightPadding(): string | SafeStyle | null {
-    if (this.directionService.isRtl()) {
-      return this.getStartPadding();
-    }
-    return null;
-  }
-
   constructor(
     columnDef: NbTreeGridColumnDefDirective,
     elementRef: ElementRef<HTMLElement>,
@@ -78,6 +65,7 @@ export class NbTreeGridCellDirective extends NbCellDirective implements OnInit, 
     private directionService: NbLayoutDirectionService,
     private columnService: NbColumnsService,
     private cd: ChangeDetectorRef,
+    private renderer: Renderer2,
   ) {
     super(columnDef, elementRef);
     this.tree = tree as NbTreeGridComponent<any>;
@@ -98,6 +86,29 @@ export class NbTreeGridCellDirective extends NbCellDirective implements OnInit, 
         takeUntil(this.destroy$),
       )
       .subscribe(() => this.cd.detectChanges());
+  }
+
+  ngDoCheck() {
+    // setTimeout(() => {
+      this.setPadding();
+    // });
+  }
+
+  ngAfterViewChecked(): void {
+  }
+
+  private setPadding() {
+    const paddingProp = this.directionService.isLtr()
+      ? 'padding-left'
+      : 'padding-right';
+    const oppositePaddingProp = this.directionService.isLtr()
+      ? 'padding-right'
+      : 'padding-left';
+    const paddingValue = this.getStartPadding();
+    if (paddingValue) {
+      this.renderer.setStyle(this.elementRef.nativeElement, paddingProp, paddingValue);
+      this.renderer.setStyle(this.elementRef.nativeElement, oppositePaddingProp, '0');
+    }
   }
 
   ngOnDestroy() {
@@ -133,7 +144,8 @@ export class NbTreeGridCellDirective extends NbCellDirective implements OnInit, 
       return null;
     }
 
-    return this.sanitizer.bypassSecurityTrustStyle(padding);
+    // return this.sanitizer.bypassSecurityTrustStyle(padding);
+    return padding;
   }
 }
 
