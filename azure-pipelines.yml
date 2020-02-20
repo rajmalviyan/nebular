@@ -12,7 +12,7 @@ variables:
   azureSubscription: '732d717c-9cb0-4491-8a2f-36718ab98e0d'
   
   # Web app name
-  webAppName: ''
+  webAppName: 'ngx-admin'
   
   # Environment name
   environmentName: ''
