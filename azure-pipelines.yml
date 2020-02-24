@@ -9,10 +9,10 @@ trigger:
 variables:
 
   # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: '732d717c-9cb0-4491-8a2f-36718ab98e0d'
+  azureSubscription: 'cfcdfd0b-26ef-46eb-bef5-38aa34de648c'
   
   # Web app name
-  webAppName: 'ngx-admin'
+  webAppName: 'ngx-admin-demo'
   
   # Environment name
   environmentName: 'prd'
